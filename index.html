@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Animals">
+<title>Lenni's Animals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff7e8;
+    --ink: #3b2f4a;
+    --night: #2b2d5c;
+    --star: #ffe27a;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Fredoka", "Chalkboard SE", "Comic Sans MS", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-user-select: none; user-select: none;
+  }
+  header { text-align: center; padding: 24px 16px 8px; }
+  h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: .5px; }
+  header p { margin: 6px 0 0; font-size: 1.2rem; opacity: .75; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .tile {
+    border: none;
+    border-radius: 28px;
+    padding: 14px 8px 12px;
+    font: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,.12);
+    transition: transform .12s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .tile:active { transform: scale(.94); }
+  .tile .pic { width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; font-size: 80px; line-height: 1; }
+  .tile .pic svg { width: 96px; height: 96px; }
+  .tile .name { font-size: 1.35rem; font-weight: 700; }
+  .wiggle { animation: wiggle .5s; }
+  @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} }
+
+  footer { text-align: center; padding: 8px 16px 40px; }
+  .small-btn {
+    font: inherit; font-size: 1rem; border: 2px solid var(--ink); background: transparent;
+    color: var(--ink); border-radius: 999px; padding: 8px 18px; cursor: pointer; opacity: .7;
+  }
+
+  /* Pop-up card */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(30,25,50,.55);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10;
+  }
+  .overlay.open { display: flex; }
+  .card {
+    background: #fff; border-radius: 32px; width: min(560px, 100%); max-height: 100%;
+    overflow: auto; text-align: center; position: relative;
+    animation: pop .25s ease-out;
+  }
+  @keyframes pop { from { transform: scale(.7); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+  .card .top { padding: 24px 20px 16px; border-radius: 32px 32px 0 0; }
+  .card .big { width: 150px; height: 150px; margin: 0 auto; font-size: 128px; line-height: 150px; }
+  .card .big svg { width: 150px; height: 150px; }
+  .card h2 { margin: 6px 0 10px; font-size: 2.2rem; }
+  .bubble {
+    display: inline-block; background: #fff; border-radius: 24px; padding: 10px 22px;
+    font-size: 1.9rem; font-weight: 700; box-shadow: 0 4px 0 rgba(0,0,0,.1);
+    animation: boing .6s ease-out;
+  }
+  @keyframes boing { 0%{transform:scale(.3)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+  .sleep {
+    background: var(--night); color: #fff; padding: 20px 22px 24px; border-radius: 0 0 32px 32px;
+    position: relative; overflow: hidden;
+    opacity: 0; transition: opacity .6s ease-out;
+  }
+  .sleep.show { opacity: 1; }
+  .sleep .q { font-size: 1.5rem; margin: 0 0 8px; }
+  .sleep .a {
+    display: inline-block; background: var(--star); color: var(--night); font-weight: 700;
+    font-size: 1.6rem; border-radius: 999px; padding: 4px 20px; margin-bottom: 12px;
+  }
+  .sleep .fact { font-size: 1.3rem; line-height: 1.45; margin: 0; }
+  .zzz { position: absolute; top: 10px; right: 18px; font-size: 1.6rem; font-weight: 700; color: var(--star); }
+  .zzz span { display: inline-block; animation: float 2.4s infinite; opacity: 0; }
+  .zzz span:nth-child(2) { animation-delay: .6s; font-size: 1.3em; }
+  .zzz span:nth-child(3) { animation-delay: 1.2s; font-size: 1.6em; }
+  @keyframes float { 0%{opacity:0; transform:translateY(10px)} 30%{opacity:1} 100%{opacity:0; transform:translateY(-22px)} }
+  .moon { position: absolute; top: 12px; left: 18px; font-size: 1.8rem; }
+
+  .card-btns { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
+  .round {
+    width: 52px; height: 52px; border-radius: 50%; border: none; background: rgba(255,255,255,.85);
+    font-size: 1.6rem; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.12); color: var(--ink);
+  }
+
+  /* Printable book: hidden on screen */
+  .book { display: none; }
+  @media print {
+    @page { size: A4; margin: 18mm; }
+    header, .grid, footer, .overlay { display: none !important; }
+    body { background: #fff; }
+    .book { display: block; }
+    .page {
+      height: 255mm; page-break-after: always; break-after: page;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    }
+    .page:last-child { page-break-after: auto; break-after: auto; }
+    .page .bp { font-size: 220px; line-height: 1; height: 240px; display: flex; align-items: center; }
+    .page .bp svg { width: 240px; height: 240px; }
+    .page h2 { font-size: 44pt; margin: 10mm 0 4mm; }
+    .page .bs { font-size: 34pt; font-weight: 700; margin-bottom: 12mm; }
+    .page .bq { font-size: 20pt; margin: 0 0 3mm; }
+    .page .bf { font-size: 18pt; line-height: 1.5; max-width: 140mm; margin: 0; }
+    .cover h1 { font-size: 54pt; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Lenni's Animals</h1>
+  <p>Tap an animal to hear it!</p>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<footer>
+  <button class="small-btn" id="printBtn">🖨️ Print as a book</button>
+  <p><a href="credits.html" style="color:inherit;opacity:.5;font-size:.9rem">Sound credits</a></p>
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="book" id="book"></div>
+
+<script src="animals.js"></script>
+<script src="audio-manifest.js"></script>
+<script>
+// Cartoon drawings for animals with no emoji
+const SVG = {
+  stingray: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M50 72 Q55 86 70 95" stroke="#4f7391" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M50 16 C60 28 84 36 95 50 C82 58 64 62 50 74 C36 62 18 58 5 50 C16 36 40 28 50 16Z" fill="#7fa6c6"/>
+    <path d="M50 26 C57 34 72 40 80 49 C70 54 59 57 50 64 C41 57 30 54 20 49 C28 40 43 34 50 26Z" fill="#9cbcd6"/>
+    <circle cx="28" cy="46" r="2" fill="#5f88aa"/><circle cx="72" cy="46" r="2" fill="#5f88aa"/>
+    <circle cx="43" cy="40" r="6" fill="#fff"/><circle cx="57" cy="40" r="6" fill="#fff"/>
+    <circle cx="44" cy="41" r="3" fill="#222"/><circle cx="58" cy="41" r="3" fill="#222"/>
+    <circle cx="45" cy="39.5" r="1" fill="#fff"/><circle cx="59" cy="39.5" r="1" fill="#fff"/>
+    <ellipse cx="37" cy="50" rx="4" ry="2.5" fill="#f4a7b9" opacity=".8"/><ellipse cx="63" cy="50" rx="4" ry="2.5" fill="#f4a7b9" opacity=".8"/>
+    <path d="M44 51 Q50 56 56 51" stroke="#2c4a63" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  lemur: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M68 82 C92 78 96 52 86 36 C80 26 70 26 72 16" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M68 82 C92 78 96 52 86 36 C80 26 70 26 72 16" stroke="#222" stroke-width="11" fill="none" stroke-dasharray="7 7" stroke-linecap="butt"/>
+    <path d="M26 30 L22 12 L38 24Z" fill="#8e8e8e"/><path d="M74 30 L78 12 L62 24Z" fill="#8e8e8e"/>
+    <path d="M27 27 L25 17 L34 24Z" fill="#fff"/><path d="M73 27 L75 17 L66 24Z" fill="#fff"/>
+    <ellipse cx="50" cy="52" rx="30" ry="28" fill="#a3a3a3"/>
+    <ellipse cx="50" cy="60" rx="19" ry="21" fill="#fff"/>
+    <ellipse cx="40" cy="51" rx="8" ry="10" fill="#2a2a2a" transform="rotate(-15 40 51)"/>
+    <ellipse cx="60" cy="51" rx="8" ry="10" fill="#2a2a2a" transform="rotate(15 60 51)"/>
+    <circle cx="40" cy="51" r="5" fill="#f5a623"/><circle cx="60" cy="51" r="5" fill="#f5a623"/>
+    <circle cx="40" cy="51" r="2.4" fill="#111"/><circle cx="60" cy="51" r="2.4" fill="#111"/>
+    <circle cx="41" cy="49.5" r="1" fill="#fff"/><circle cx="61" cy="49.5" r="1" fill="#fff"/>
+    <path d="M44 62 L50 76 L56 62Z" fill="#2a2a2a"/>
+    <ellipse cx="50" cy="73" rx="5" ry="3.5" fill="#111"/>
+    <path d="M45 79 Q50 83 55 79" stroke="#2a2a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  springbok: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M22 56 Q14 52 16 46" stroke="#c98a4b" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <g stroke="#c98a4b" stroke-width="4.5" stroke-linecap="round">
+      <line x1="30" y1="64" x2="28" y2="88"/><line x1="38" y1="66" x2="39" y2="88"/>
+      <line x1="64" y1="66" x2="62" y2="88"/><line x1="72" y1="64" x2="75" y2="88"/>
+    </g>
+    <g fill="#3a2a1a"><rect x="25.5" y="86" width="5" height="4" rx="1"/><rect x="36.5" y="86" width="5" height="4" rx="1"/><rect x="59.5" y="86" width="5" height="4" rx="1"/><rect x="72.5" y="86" width="5" height="4" rx="1"/></g>
+    <ellipse cx="50" cy="56" rx="30" ry="14" fill="#d9995a"/>
+    <path d="M24 60 Q50 76 78 60 Q72 70 50 71 Q30 71 24 60Z" fill="#fff"/>
+    <path d="M23 59 Q50 64 78 58" stroke="#7a4524" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M68 52 L77 28 L88 32 L80 56Z" fill="#d9995a"/>
+    <path d="M80 21 C76 13 75 7 80 3" stroke="#3a2a1a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M85 20 C83 12 84 7 89 4" stroke="#3a2a1a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="75" cy="24" rx="6" ry="3" fill="#c98a4b" transform="rotate(-25 75 24)"/>
+    <ellipse cx="85" cy="28" rx="12" ry="8" fill="#d9995a" transform="rotate(20 85 28)"/>
+    <ellipse cx="91" cy="31" rx="6" ry="4.5" fill="#fff" transform="rotate(20 91 31)"/>
+    <circle cx="84" cy="25" r="2.4" fill="#222"/><circle cx="84.7" cy="24.3" r=".8" fill="#fff"/>
+    <circle cx="96" cy="33" r="1.3" fill="#222"/>
+  </svg>`,
+  kookaburra: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="6" y="80" width="88" height="7" rx="3.5" fill="#8a5a33"/>
+    <path d="M30 68 L12 86 L21 89 L37 73Z" fill="#a0703f"/>
+    <path d="M24 76 L28 80 M19 81 L23 85" stroke="#5e3b1e" stroke-width="2"/>
+    <ellipse cx="46" cy="62" rx="20" ry="19" fill="#f3ead8"/>
+    <path d="M28 52 Q22 70 35 80 Q52 79 56 64 Q50 49 28 52Z" fill="#8a5a33"/>
+    <path d="M32 58 Q31 66 37 70 Q43 66 43 60Z" fill="#6fa8dc"/>
+    <circle cx="52" cy="36" r="17" fill="#f3ead8"/>
+    <path d="M36 32 Q48 15 67 28 Q58 25 51 28 Q43 26 36 32Z" fill="#a9845a"/>
+    <path d="M40 39 Q51 34 62 37" stroke="#6b4423" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="57" cy="36" r="3.6" fill="#222"/><circle cx="58" cy="35" r="1.1" fill="#fff"/>
+    <path d="M63 35 L94 42 Q82 48 63 46Z" fill="#3b3b3b"/>
+    <path d="M63 42 L92 43 Q81 47 63 46Z" fill="#d9cdb4"/>
+    <path d="M42 80 L40 86 M50 80 L50 86" stroke="#6b6b6b" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`,
+  wombat: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="#6f5640"><rect x="20" y="70" width="11" height="14" rx="5"/><rect x="34" y="72" width="11" height="13" rx="5"/>
+      <rect x="56" y="72" width="11" height="13" rx="5"/><rect x="68" y="70" width="11" height="14" rx="5"/></g>
+    <ellipse cx="46" cy="60" rx="34" ry="22" fill="#8b6f55"/>
+    <ellipse cx="44" cy="68" rx="24" ry="9" fill="#9f8468" opacity=".6"/>
+    <circle cx="67" cy="41" r="6" fill="#7a6048"/><circle cx="81" cy="40" r="6" fill="#7a6048"/>
+    <circle cx="67" cy="41" r="3" fill="#d9a5a0"/><circle cx="81" cy="40" r="3" fill="#d9a5a0"/>
+    <ellipse cx="76" cy="56" rx="17" ry="15" fill="#9a7d61"/>
+    <ellipse cx="88" cy="61" rx="8" ry="6.5" fill="#4a3a2c"/>
+    <ellipse cx="86" cy="59" rx="2.5" ry="1.5" fill="#6d5844"/>
+    <circle cx="76" cy="51" r="2.8" fill="#222"/><circle cx="76.9" cy="50.2" r=".9" fill="#fff"/>
+    <ellipse cx="72" cy="60" rx="3.5" ry="2.2" fill="#e8a8a8" opacity=".7"/>
+    <path d="M80 68 Q84 70 87 68" stroke="#3a2c20" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  platypus: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <ellipse cx="14" cy="58" rx="12" ry="7" fill="#6b4a2f"/>
+    <path d="M30 66 l-7 11 h14z M58 67 l-5 11 h14z" fill="#4a4a52"/>
+    <ellipse cx="46" cy="56" rx="30" ry="15" fill="#8a6440"/>
+    <path d="M22 61 Q46 75 72 61 Q60 69 46 70 Q32 69 22 61Z" fill="#b08a62"/>
+    <ellipse cx="73" cy="52" rx="12" ry="11" fill="#8a6440"/>
+    <path d="M80 46 Q99 44 98 53 Q99 62 80 60Z" fill="#4a4a52"/>
+    <path d="M82 53 Q90 54 97 53" stroke="#33333a" stroke-width="1.2" fill="none"/>
+    <circle cx="92" cy="49" r="1" fill="#222"/>
+    <circle cx="74" cy="48" r="2.6" fill="#222"/><circle cx="74.8" cy="47.2" r=".8" fill="#fff"/>
+    <path d="M0 74 Q12 70 25 74 T50 74 T75 74 T100 74 V100 H0Z" fill="#8fc0dc" opacity=".75"/>
+  </svg>`,
+  emu: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M42 70 L38 92 M56 70 L60 92" stroke="#7a6a5a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M31 93 H43 M55 93 H67" stroke="#7a6a5a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M22 56 Q24 36 48 35 Q72 35 76 54 Q78 70 66 74 L62 69 L58 76 L54 70 L50 77 L46 70 L42 76 L38 70 L34 74 Q20 70 22 56Z" fill="#6e5a48"/>
+    <path d="M32 48 Q36 56 34 64 M44 44 Q48 54 46 66 M56 44 Q60 54 58 66 M66 50 Q68 58 66 66" stroke="#8a745e" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M66 46 Q70 30 72 18" stroke="#8fa3b0" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <ellipse cx="75" cy="15" rx="8.5" ry="6.5" fill="#5e5048"/>
+    <path d="M82.5 13 L93 15.5 L82.5 18Z" fill="#3a3330"/>
+    <circle cx="77" cy="13.5" r="2.3" fill="#e8b04a"/><circle cx="77.4" cy="13.5" r="1.1" fill="#222"/>
+  </svg>`
+};
+
+const pic = a => a.svg ? SVG[a.svg] : a.emoji;
+
+// ---- Speech ----
+const synth = window.speechSynthesis;
+let voice = null;
+function pickVoice() {
+  if (!synth) return;
+  const vs = synth.getVoices();
+  const en = vs.filter(v => v.lang && v.lang.startsWith("en"));
+  const lang = v => v.lang.replace("_", "-");
+  // Premium / Enhanced voices sound far more natural. Prefer Australian, then any English.
+  const hq = en.filter(v => /premium|enhanced|neural|natural/i.test(v.name));
+  voice = hq.find(v => lang(v) === "en-AU") || hq[0] ||
+          en.find(v => lang(v) === "en-AU") ||
+          en.find(v => lang(v) === "en-GB") || en[0] || null;
+}
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+
+// Device voice: only used when there's no audio file. Natural pitch sounds least fake.
+function say(text, { pitch = 1, rate = 0.92 } = {}) {
+  return new Promise(done => {
+    if (!synth) return done();
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice ? voice.lang : "en-AU";
+    u.pitch = pitch; u.rate = rate;
+    u.onend = done; u.onerror = done;
+    synth.speak(u);
+    setTimeout(done, 20000); // safety net if the browser never fires onend
+  });
+}
+
+// ---- Audio files ----
+// audio-manifest.js lists which recordings exist: sounds/<id>.mp3 and voice/<id>.mp3
+const AUDIO = window.AUDIO || { sounds: [], voice: [] };
+const hasSound = new Set(AUDIO.sounds), hasVoice = new Set(AUDIO.voice);
+// One reused <audio> element: iPad Safari only lets an element play after a tap has "unlocked" it
+const player = new Audio();
+player.preload = "auto";
+function playFile(src) {
+  return new Promise(done => {
+    player.onended = done; player.onerror = done;
+    player.src = src;
+    player.play().catch(done);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+let playId = 0;
+function stopAll() {
+  playId++;
+  player.pause();
+  if (synth) synth.cancel();
+}
+
+async function speakAnimal(a) {
+  stopAll();
+  const me = playId;
+  const stillMe = () => me === playId;
+  // 1. The animal's sound: real recording, otherwise the device voice says it
+  if (hasSound.has(a.id)) await playFile(`sounds/${a.id}.mp3`);
+  else if (!a.silent || !hasVoice.has(a.id)) await say(a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
+  if (!stillMe()) return;
+  showSleep();
+  await wait(350);
+  if (!stillMe()) return;
+  // 2. The sleep fact: recorded narrator, otherwise the device voice
+  if (hasVoice.has(a.id)) { await playFile(`voice/${a.id}.mp3`); return; }
+  if (a.silent && hasSound.has(a.id)) await say(a.say);
+  if (!stillMe()) return;
+  await say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
+}
+
+function showSleep() {
+  const s = card.querySelector(".sleep");
+  if (s) s.classList.add("show");
+}
+
+// ---- Grid ----
+const grid = document.getElementById("grid");
+ANIMALS.forEach(a => {
+  const b = document.createElement("button");
+  b.className = "tile";
+  b.style.background = a.colour;
+  b.setAttribute("aria-label", a.name);
+  b.innerHTML = `<div class="pic">${pic(a)}</div><div class="name">${a.name}</div>`;
+  b.addEventListener("click", () => {
+    b.classList.remove("wiggle"); void b.offsetWidth; b.classList.add("wiggle");
+    openCard(a);
+  });
+  grid.appendChild(b);
+});
+
+// ---- Card ----
+const overlay = document.getElementById("overlay");
+const card = document.getElementById("card");
+function openCard(a) {
+  card.innerHTML = `
+    <div class="top" style="background:${a.colour}">
+      <div class="card-btns">
+        <button class="round" id="again" aria-label="Play again">🔊</button>
+        <button class="round" id="close" aria-label="Close">✕</button>
+      </div>
+      <div class="big">${pic(a)}</div>
+      <h2>${a.name}</h2>
+      <div class="bubble">${a.sound}</div>
+    </div>
+    <div class="sleep">
+      <div class="moon">🌙</div>
+      <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
+      <p class="q">Do ${a.plural} sleep?</p>
+      <div class="a">${a.answer}</div>
+      <p class="fact">${a.fact}</p>
+    </div>`;
+  overlay.classList.add("open");
+  card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+  speakAnimal(a);
+  setTimeout(showSleep, 6000); // show the sleep part even if audio is slow or blocked
+  document.getElementById("again").onclick = e => { e.stopPropagation(); speakAnimal(a); };
+  document.getElementById("close").onclick = e => { e.stopPropagation(); closeCard(); };
+}
+function closeCard() {
+  overlay.classList.remove("open");
+  stopAll();
+}
+overlay.addEventListener("click", e => { if (e.target === overlay) closeCard(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeCard(); });
+
+// ---- Printable book ----
+const book = document.getElementById("book");
+book.innerHTML =
+  `<section class="page cover"><div class="bp">📖</div><h1>Lenni's Animals</h1><p class="bq">What do they say? Do they sleep?</p></section>` +
+  ANIMALS.map(a => `
+    <section class="page">
+      <div class="bp">${pic(a)}</div>
+      <h2>${a.name}</h2>
+      <div class="bs">${a.sound}</div>
+      <p class="bq">Do ${a.plural} sleep? <b>${a.answer}</b></p>
+      <p class="bf">${a.fact}</p>
+    </section>`).join("");
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+</script>
+</body>
+</html>
