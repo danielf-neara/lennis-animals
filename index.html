@@ -108,11 +108,61 @@
     font-size: 1.6rem; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.12); color: var(--ink);
   }
 
+  /* Tell me more */
+  .more { padding: 18px 18px 22px; }
+  .more-btn {
+    font: inherit; font-size: 1.5rem; font-weight: 700; border: none; cursor: pointer;
+    background: var(--star); color: var(--night); border-radius: 999px; padding: 12px 28px;
+    box-shadow: 0 5px 0 rgba(0,0,0,.15);
+  }
+  .more-btn:active { transform: scale(.95); }
+  .facts { display: none; text-align: left; margin: 0; padding: 0; list-style: none; }
+  .more.open .facts { display: grid; gap: 10px; }
+  .more.open .more-btn { display: none; }
+  .facts li {
+    display: flex; gap: 12px; align-items: center; border-radius: 20px; padding: 10px 14px;
+    font-size: 1.2rem; line-height: 1.35; animation: boing .5s ease-out both;
+  }
+  .facts li:nth-child(2) { animation-delay: .1s } .facts li:nth-child(3) { animation-delay: .2s } .facts li:nth-child(4) { animation-delay: .3s }
+  .facts .ic { font-size: 2rem; flex: none; }
+
+  /* Sound game */
+  .play-btn {
+    font: inherit; font-size: 1.4rem; font-weight: 700; margin-top: 14px; border: none; cursor: pointer;
+    background: var(--night); color: #fff; border-radius: 999px; padding: 12px 26px;
+    box-shadow: 0 5px 0 rgba(0,0,0,.2);
+  }
+  .play-btn:active { transform: scale(.95); }
+  .game {
+    position: fixed; inset: 0; z-index: 20; background: var(--bg); display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 20px; text-align: center;
+  }
+  .game.open { display: flex; }
+  .game .card-btns .round { background: #fff; }
+  .game h2 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); }
+  .stars { font-size: 2.4rem; letter-spacing: 6px; }
+  .stars .on { animation: boing .6s ease-out; display: inline-block; }
+  .listen {
+    width: 110px; height: 110px; border-radius: 50%; border: none; cursor: pointer; font-size: 3.4rem;
+    background: var(--star); box-shadow: 0 6px 0 rgba(0,0,0,.15);
+  }
+  .listen.playing { animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.1) } }
+  .choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .choices .tile { width: min(30vw, 190px); transition: transform .12s, opacity .3s, filter .3s; }
+  .choices .tile .pic { width: 110px; height: 110px; font-size: 92px; }
+  .choices .tile .pic svg { width: 110px; height: 110px; }
+  .choices .tile.wrong { opacity: .35; filter: grayscale(1); animation: shake .4s; pointer-events: none; }
+  .choices .tile.right { animation: boing .6s ease-out; box-shadow: 0 0 0 6px #5cc96b, 0 6px 0 rgba(0,0,0,.12); }
+  .choices .tile.fade { opacity: .25; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+  .party { font-size: 6rem; animation: boing .8s ease-out; }
+
   /* Printable book: hidden on screen */
   .book { display: none; }
   @media print {
     @page { size: A4; margin: 18mm; }
-    header, .grid, footer, .overlay { display: none !important; }
+    header, .grid, footer, .overlay, .game { display: none !important; }
     body { background: #fff; }
     .book { display: block; }
     .page {
@@ -120,12 +170,14 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     }
     .page:last-child { page-break-after: auto; break-after: auto; }
-    .page .bp { font-size: 220px; line-height: 1; height: 240px; display: flex; align-items: center; }
-    .page .bp svg { width: 240px; height: 240px; }
-    .page h2 { font-size: 44pt; margin: 10mm 0 4mm; }
-    .page .bs { font-size: 34pt; font-weight: 700; margin-bottom: 12mm; }
+    .page .bp { font-size: 170px; line-height: 1; height: 190px; display: flex; align-items: center; }
+    .page .bp svg { width: 190px; height: 190px; }
+    .page h2 { font-size: 40pt; margin: 6mm 0 3mm; }
+    .page .bs { font-size: 30pt; font-weight: 700; margin-bottom: 8mm; }
     .page .bq { font-size: 20pt; margin: 0 0 3mm; }
     .page .bf { font-size: 18pt; line-height: 1.5; max-width: 140mm; margin: 0; }
+    .page .bm { list-style: none; padding: 0; margin: 8mm 0 0; max-width: 150mm; text-align: left; font-size: 13pt; line-height: 1.4; }
+    .page .bm li { margin-bottom: 2mm; }
     .cover h1 { font-size: 54pt; }
   }
 </style>
@@ -135,6 +187,7 @@
 <header>
   <h1>Lenni's Animals</h1>
   <p>Tap an animal to hear it!</p>
+  <button class="play-btn" id="gameBtn">🎮 Who makes this sound?</button>
 </header>
 
 <main class="grid" id="grid"></main>
@@ -147,6 +200,8 @@
 <div class="overlay" id="overlay">
   <div class="card" id="card"></div>
 </div>
+
+<div class="game" id="game" aria-live="polite"></div>
 
 <div class="book" id="book"></div>
 
@@ -251,6 +306,16 @@ const SVG = {
     <ellipse cx="75" cy="15" rx="8.5" ry="6.5" fill="#5e5048"/>
     <path d="M82.5 13 L93 15.5 L82.5 18Z" fill="#3a3330"/>
     <circle cx="77" cy="13.5" r="2.3" fill="#e8b04a"/><circle cx="77.4" cy="13.5" r="1.1" fill="#222"/>
+  </svg>`,
+  echidna: `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="#4a3426"><ellipse cx="26" cy="82" rx="7" ry="5"/><ellipse cx="42" cy="84" rx="7" ry="5"/><ellipse cx="58" cy="84" rx="7" ry="5"/></g>
+    <g stroke="#f1e2c4" stroke-width="4" stroke-linecap="round"><line x1="19" y1="60" x2="4" y2="58"/><line x1="20" y1="57" x2="6" y2="53"/><line x1="21" y1="54" x2="9" y2="47"/><line x1="24" y1="51" x2="13" y2="42"/><line x1="27" y1="48" x2="18" y2="38"/><line x1="30" y1="46" x2="23" y2="35"/><line x1="34" y1="44" x2="29" y2="32"/><line x1="38" y1="43" x2="35" y2="31"/><line x1="42" y1="43" x2="42" y2="30"/><line x1="46" y1="43" x2="49" y2="31"/><line x1="50" y1="44" x2="55" y2="32"/><line x1="54" y1="46" x2="61" y2="35"/><line x1="57" y1="48" x2="66" y2="38"/><line x1="60" y1="51" x2="71" y2="42"/><line x1="63" y1="54" x2="75" y2="47"/></g>
+    <g stroke="#3a2a20" stroke-width="2.4" stroke-linecap="round"><line x1="9" y1="59" x2="4" y2="58"/><line x1="10" y1="54" x2="6" y2="53"/><line x1="13" y1="49" x2="9" y2="47"/><line x1="16" y1="45" x2="13" y2="42"/><line x1="20" y1="41" x2="18" y2="38"/><line x1="25" y1="38" x2="23" y2="35"/><line x1="30" y1="36" x2="29" y2="32"/><line x1="36" y1="34" x2="35" y2="31"/><line x1="42" y1="34" x2="42" y2="30"/><line x1="48" y1="34" x2="49" y2="31"/><line x1="54" y1="36" x2="55" y2="32"/><line x1="59" y1="38" x2="61" y2="35"/><line x1="64" y1="41" x2="66" y2="38"/><line x1="68" y1="45" x2="71" y2="42"/><line x1="71" y1="49" x2="75" y2="47"/></g>
+    <path d="M10 70 Q12 44 42 44 Q68 44 72 62 Q72 80 46 80 Q16 82 10 70Z" fill="#7a5a43"/>
+    <ellipse cx="72" cy="66" rx="11" ry="10" fill="#8a6a52"/>
+    <path d="M80 62 Q92 66 99 78 Q96 80 93 77 Q88 72 79 71Z" fill="#4a3426"/>
+    <circle cx="74" cy="62" r="2.6" fill="#222"/><circle cx="74.8" cy="61.2" r=".8" fill="#fff"/>
+    <ellipse cx="68" cy="70" rx="3.5" ry="2.2" fill="#e8a8a8" opacity=".7"/>
   </svg>`
 };
 
@@ -327,6 +392,14 @@ async function speakAnimal(a) {
   await say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
 }
 
+// Food, baby, home, wow fact
+const MORE_ROWS = [["eats", "🍽️"], ["baby", "🍼"], ["home", "🏠"], ["fun", "🤩"]];
+async function speakMore(a) {
+  stopAll();
+  if (hasVoice.has(`${a.id}-more`)) await playFile(`voice/${a.id}-more.mp3`);
+  else await say(moreNarration(a));
+}
+
 function showSleep() {
   const s = card.querySelector(".sleep");
   if (s) s.classList.add("show");
@@ -367,8 +440,20 @@ function openCard(a) {
       <p class="q">Do ${a.plural} sleep?</p>
       <div class="a">${a.answer}</div>
       <p class="fact">${a.fact}</p>
+    </div>
+    <div class="more">
+      <button class="more-btn" id="moreBtn">⭐ Tell me more!</button>
+      <ul class="facts">
+        ${MORE_ROWS.map(([k, ic]) => `<li style="background:${a.colour}"><span class="ic">${ic}</span><span>${a[k]}</span></li>`).join("")}
+      </ul>
     </div>`;
   overlay.classList.add("open");
+  document.getElementById("moreBtn").onclick = e => {
+    e.stopPropagation();
+    card.querySelector(".more").classList.add("open");
+    card.querySelector(".facts").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    speakMore(a);
+  };
   card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
   speakAnimal(a);
   setTimeout(showSleep, 6000); // show the sleep part even if audio is slow or blocked
@@ -382,6 +467,114 @@ function closeCard() {
 overlay.addEventListener("click", e => { if (e.target === overlay) closeCard(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeCard(); });
 
+// ---- Sound game: hear a sound, tap who made it ----
+const ROUNDS = 5;
+// Animals that sound alike are never offered together
+const ALIKE = [["dog", "wolf", "fox"], ["bear", "polarbear", "panda"], ["horse", "zebra", "donkey"],
+               ["rooster", "chick"], ["sheep", "goat"], ["lion", "tiger"], ["seal", "otter"]];
+const alike = (x, y) => x === y || ALIKE.some(g => g.includes(x) && g.includes(y));
+const shuffle = arr => arr.map(v => [Math.random(), v]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+const gameEl = document.getElementById("game");
+const gamePool = () => ANIMALS.filter(a => hasSound.has(a.id) && !a.silent);
+let game = null;
+
+function gameLine(key, text) {
+  return hasVoice.has(`game-${key}`) ? playFile(`voice/game-${key}.mp3`) : say(text);
+}
+
+function openGame() {
+  game = { round: 0, picks: shuffle(gamePool()).slice(0, ROUNDS) };
+  gameEl.classList.add("open");
+  nextRound();
+}
+function closeGame() {
+  game = null;
+  gameEl.classList.remove("open");
+  stopAll();
+}
+
+function starsHtml(n) {
+  return Array.from({ length: ROUNDS }, (_, i) =>
+    i < n ? `<span class="${i === n - 1 ? "on" : ""}">⭐</span>` : `<span style="opacity:.2;filter:grayscale(1)">⭐</span>`).join("");
+}
+
+function nextRound() {
+  if (game.round >= game.picks.length) return finishGame();
+  const target = game.picks[game.round];
+  const others = shuffle(gamePool().filter(a => !alike(a.id, target.id)));
+  const choices = [target];
+  for (const a of others) {
+    if (choices.length === 3) break;
+    if (!choices.some(c => alike(c.id, a.id))) choices.push(a);
+  }
+  game.target = target; game.locked = false;
+  gameEl.innerHTML = `
+    <div class="card-btns"><button class="round" id="gClose" aria-label="Close game">✕</button></div>
+    <h2>Who makes this sound?</h2>
+    <div class="stars">${starsHtml(game.round)}</div>
+    <button class="listen" id="listen" aria-label="Hear the sound again">🔊</button>
+    <div class="choices">${shuffle(choices).map(a => `
+      <button class="tile" data-id="${a.id}" style="background:${a.colour}" aria-label="${a.name}">
+        <div class="pic">${pic(a)}</div><div class="name">${a.name}</div>
+      </button>`).join("")}</div>`;
+  document.getElementById("gClose").onclick = closeGame;
+  document.getElementById("listen").onclick = playRoundSound;
+  gameEl.querySelectorAll(".choices .tile").forEach(t => t.onclick = () => choose(t));
+  playRoundSound();
+}
+
+async function playRoundSound(askAfter = true) {
+  stopAll();
+  const me = playId, btn = document.getElementById("listen");
+  btn.classList.add("playing");
+  await playFile(`sounds/${game.target.id}.mp3`);
+  btn.classList.remove("playing");
+  if (me !== playId || askAfter === false) return;
+  await gameLine("ask", GAME_LINES.ask);
+}
+
+async function choose(tile) {
+  if (!game || game.locked) return;
+  const a = game.target;
+  stopAll();
+  const me = playId;
+  if (tile.dataset.id !== a.id) {
+    tile.classList.add("wrong");
+    await gameLine("again", GAME_LINES.again);
+    if (me === playId) playRoundSound(false);
+    return;
+  }
+  game.locked = true;
+  tile.classList.add("right");
+  gameEl.querySelectorAll(".choices .tile").forEach(t => { if (t !== tile) t.classList.add("fade"); });
+  gameEl.querySelector(".stars").innerHTML = starsHtml(game.round + 1);
+  await gameLine(a.id, gameNarration(a));
+  await wait(600);
+  if (me !== playId || !game) return;
+  game.round++;
+  nextRound();
+}
+
+function finishGame() {
+  gameEl.innerHTML = `
+    <div class="party">🎉</div>
+    <h2>You did it!</h2>
+    <div class="stars">${starsHtml(ROUNDS)}</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <button class="play-btn" id="gAgain">🔁 Play again</button>
+      <button class="play-btn" id="gHome" style="background:#fff;color:var(--ink)">🏠 Back to animals</button>
+    </div>`;
+  document.getElementById("gAgain").onclick = openGame;
+  document.getElementById("gHome").onclick = closeGame;
+  stopAll();
+  gameLine("done", GAME_LINES.done);
+}
+
+const gameBtn = document.getElementById("gameBtn");
+if (gamePool().length < 3) gameBtn.hidden = true;
+gameBtn.addEventListener("click", openGame);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && game) closeGame(); });
+
 // ---- Printable book ----
 const book = document.getElementById("book");
 book.innerHTML =
@@ -393,6 +586,7 @@ book.innerHTML =
       <div class="bs">${a.sound}</div>
       <p class="bq">Do ${a.plural} sleep? <b>${a.answer}</b></p>
       <p class="bf">${a.fact}</p>
+      <ul class="bm">${MORE_ROWS.map(([k, ic]) => `<li>${ic} ${a[k]}</li>`).join("")}</ul>
     </section>`).join("");
 document.getElementById("printBtn").addEventListener("click", () => window.print());
 </script>

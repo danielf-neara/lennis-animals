@@ -205,12 +205,146 @@ const ANIMALS = [
   { id: "emu", name: "Emu", plural: "emus", svg: "emu", colour: "#e6dccc",
     sound: "Boom boom boom!", say: "Boom. Boom. Boom.", pitch: 0.6,
     sfx: "an emu making deep drumming booming sounds",
-    answer: "Yes!", fact: "Emus sit down to sleep and tuck their long neck in. They wake up lots in the night to check for danger." }
+    answer: "Yes!", fact: "Emus sit down to sleep and tuck their long neck in. They wake up lots in the night to check for danger." },
+
+  // ---- Batch 4 ----
+  { id: "goat", name: "Goat", plural: "goats", emoji: "🐐", colour: "#eee3cf",
+    sound: "Maaa-aa!", say: "Maaa! Maaa-aa!", pitch: 1.3,
+    sfx: "a goat bleating",
+    answer: "Yes!", fact: "Goats sleep about 5 hours a day. They like to sleep up high, on a rock or a pile of hay!" },
+  { id: "fox", name: "Fox", plural: "foxes", emoji: "🦊", colour: "#ffd1b0",
+    sound: "Yip yip!", say: "Yip! Yip yip!", pitch: 1.5,
+    sfx: "a red fox yipping and barking at night",
+    answer: "Yes!", fact: "Foxes curl up in a ball and wrap their big fluffy tail around their nose, like a blanket!" },
+  { id: "polarbear", name: "Polar bear", plural: "polar bears", emoji: "🐻‍❄️", colour: "#dff0fa",
+    sound: "Grrr-huff!", say: "Grrrr! Huff huff!", pitch: 0.6, rate: 0.8,
+    sfx: "a polar bear growling and huffing",
+    answer: "Yes!", fact: "Polar bears dig a bed in the snow and cover their nose with a paw to stay warm. Mum polar bears stay in a snow den all winter while their babies are born!" },
+  { id: "camel", name: "Camel", plural: "camels", emoji: "🐫", colour: "#f3dcb2",
+    sound: "Grumble groan!", say: "Grrrumble! Groooan!", pitch: 0.6, rate: 0.8,
+    sfx: "a camel groaning and grumbling",
+    answer: "Yes!", fact: "Camels fold their legs underneath them and sleep sitting down on the sand." },
+  { id: "peacock", name: "Peacock", plural: "peacocks", emoji: "🦚", colour: "#c7e8e0",
+    sound: "Ay-AW!", say: "Ay-aw! Ay-aw!", pitch: 1.4,
+    sfx: "a peacock's loud call",
+    answer: "Yes!", fact: "Peacocks fly up into tall trees to sleep at night, where they're safe from foxes and tigers." },
+  { id: "eagle", name: "Eagle", plural: "eagles", emoji: "🦅", colour: "#e6dccd",
+    sound: "Screech!", say: "Screeeech!", pitch: 1.6,
+    sfx: "an eagle screeching call",
+    answer: "Yes!", fact: "Eagles sleep sitting up on a high branch or in their huge nest. They fluff up their feathers to stay warm." },
+  { id: "butterfly", name: "Butterfly", plural: "butterflies", emoji: "🦋", colour: "#d6e4ff", silent: true,
+    sound: "Shhh... no sound!", say: "Butterflies don't make any sound. Shhh!",
+    sfx: "gentle garden ambience with soft birdsong",
+    answer: "Yes, they rest!", fact: "Butterflies rest at night under a leaf with their wings folded shut. In the morning they wait for the sun to warm them up before they can fly!" },
+  { id: "ladybird", name: "Ladybird", plural: "ladybirds", emoji: "🐞", colour: "#ffd6d0", silent: true,
+    sound: "Shhh... no sound!", say: "Ladybirds are very quiet. Shhh!",
+    sfx: "gentle garden ambience with soft birdsong",
+    answer: "Yes, they rest!", fact: "Ladybirds rest at night. In winter, lots of ladybirds snuggle together in a big pile and sleep until spring!" },
+  { id: "snail", name: "Snail", plural: "snails", emoji: "🐌", colour: "#e4efc8", silent: true,
+    sound: "Shhh... very quiet!", say: "Snails don't make a sound. Shhh!",
+    sfx: "gentle garden ambience after rain, soft drips",
+    answer: "Yes!", fact: "Snails can nap for more than half the day. When it's very hot and dry, they close up their shell and can sleep for months!" },
+  { id: "crab", name: "Crab", plural: "crabs", emoji: "🦀", colour: "#ffd2c4", silent: true,
+    sound: "Click clack!", say: "Crabs are mostly quiet. Click clack!",
+    sfx: "crab claws clicking on rocks at the beach, gentle waves",
+    answer: "Yes, they rest!", fact: "Crabs rest hiding in the sand or under a rock, keeping very still. Scientists think they have a kind of sleep too!" },
+  { id: "chick", name: "Chick", plural: "chicks", emoji: "🐤", colour: "#fff1a8",
+    sound: "Peep peep!", say: "Peep! Peep peep!", pitch: 2, rate: 1.2,
+    sfx: "a baby chick peeping",
+    answer: "Yes!", fact: "Baby chicks take lots of tiny naps. Sometimes they fall asleep standing up! At night they snuggle under their mum's wings." },
+  { id: "echidna", name: "Echidna", plural: "echidnas", svg: "echidna", colour: "#ead9c6", silent: true,
+    sound: "Snuffle snuffle!", say: "Echidnas are very quiet. They just go snuffle snuffle!",
+    sfx: "a small animal snuffling and sniffing in dry leaves",
+    answer: "Yes!", fact: "Echidnas sleep in a burrow or a hollow log. In cold places, they hibernate for weeks in winter!" },
 ];
+
+// Extra facts for the "Tell me more" part of each card. Full sentences, because the narrator reads them out.
+//   eats = food, baby = what the baby is called, home = where it lives, fun = one wow fact
+const MORE = {
+  jellyfish: { eats: "Jellyfish eat tiny sea creatures called plankton.", baby: "Baby jellyfish start life as tiny blobs stuck to rocks, called polyps.", home: "Jellyfish live in oceans all over the world.", fun: "Jellyfish were around before the dinosaurs!" },
+  owl: { eats: "Owls eat mice, bugs and other small animals.", baby: "A baby owl is called an owlet.", home: "Owls live in trees, barns and old tree holes, almost everywhere in the world.", fun: "Owls can turn their heads almost all the way around to look behind them!" },
+  cow: { eats: "Cows eat grass and hay, and chew it again and again.", baby: "A baby cow is called a calf.", home: "Cows live on farms all over the world.", fun: "A cow's tummy has four parts!" },
+  horse: { eats: "Horses eat grass and hay. They love apples and carrots too!", baby: "A baby horse is called a foal.", home: "Horses live on farms and in big open fields.", fun: "A baby horse can stand up and walk just a few hours after it's born!" },
+  stingray: { eats: "Stingrays eat crabs, shrimp and clams they find in the sand.", baby: "A baby stingray is called a pup.", home: "Stingrays live on the sandy floor of the ocean. Some even live in rivers!", fun: "A stingray's eyes are on top of its body, but its mouth is underneath!" },
+  turtle: { eats: "Sea turtles eat sea grass, jellyfish or crabs, depending on the kind of turtle.", baby: "A baby turtle is called a hatchling. It hatches from an egg buried in the sand!", home: "Sea turtles live in warm oceans. Mums crawl onto the beach to lay their eggs.", fun: "Some sea turtles swim all the way across the ocean!" },
+  dog: { eats: "Dogs eat meat and crunchy dog food.", baby: "A baby dog is called a puppy.", home: "Dogs live with people all over the world.", fun: "Every dog's nose print is different, just like your fingerprint!" },
+  lion: { eats: "Lions eat meat, like zebras and antelope.", baby: "A baby lion is called a cub.", home: "Lions live on the grassy plains of Africa.", fun: "A lion's roar can be heard 8 kilometres away!" },
+  lemur: { eats: "Lemurs eat fruit, leaves and flowers.", baby: "A baby lemur rides around holding on to its mum's tummy or back.", home: "Lemurs only live on one island, called Madagascar.", fun: "Ring-tailed lemurs sunbathe sitting up with their arms out wide!" },
+  springbok: { eats: "Springboks eat grass, leaves and flowers.", baby: "A baby springbok is called a lamb.", home: "Springboks live on dry grasslands in southern Africa.", fun: "Springboks bounce straight up into the air with stiff legs. That's called pronking!" },
+  hippo: { eats: "Hippos eat grass. They come out of the water at night to munch.", baby: "A baby hippo is called a calf.", home: "Hippos live in rivers and lakes in Africa.", fun: "Hippos can't really swim. They walk and bounce along the bottom of the river!" },
+  dolphin: { eats: "Dolphins eat fish and squid.", baby: "A baby dolphin is called a calf.", home: "Dolphins live in oceans all over the world.", fun: "Every dolphin has its own special whistle, like a name!" },
+  giraffe: { eats: "Giraffes eat leaves from the tops of tall trees.", baby: "A baby giraffe is called a calf.", home: "Giraffes live on the grasslands of Africa.", fun: "A giraffe's tongue is dark purple and about as long as your arm!" },
+  koala: { eats: "Koalas eat gum leaves, and almost nothing else.", baby: "A baby koala is called a joey. It lives in its mum's pouch.", home: "Koalas live in gum trees in eastern Australia.", fun: "Koalas have fingerprints, just like people!" },
+  otter: { eats: "Sea otters eat sea urchins, crabs and clams.", baby: "A baby sea otter is called a pup. It naps on its mum's tummy!", home: "Sea otters live along cold ocean coasts in the north Pacific.", fun: "Sea otters use rocks as tools to crack open shells!" },
+  bat: { eats: "Some bats eat bugs. Others eat fruit and flower nectar.", baby: "A baby bat is called a pup.", home: "Bats live in caves, trees and even roofs, almost everywhere in the world.", fun: "Some bats find their way in the dark by listening to echoes!" },
+  fish: { eats: "Fish eat tiny plants, bugs and smaller fish.", baby: "Baby fish are called fry.", home: "Fish live in oceans, rivers, lakes and even fish tanks!", fun: "Fish breathe underwater using gills." },
+  octopus: { eats: "Octopuses eat crabs, shrimp and fish.", baby: "Baby octopuses hatch from eggs. Some are as small as a grain of rice!", home: "Octopuses live in the ocean, hiding in rocky dens.", fun: "An octopus has three hearts and blue blood!" },
+  cat: { eats: "Cats eat meat, fish and cat food.", baby: "A baby cat is called a kitten.", home: "Cats live with people all over the world.", fun: "Cats purr when they're happy, and also to calm themselves down." },
+  pig: { eats: "Pigs eat almost anything, like vegetables, grains and scraps.", baby: "A baby pig is called a piglet.", home: "Pigs live on farms.", fun: "Pigs roll in mud to keep cool, because they can't sweat much." },
+  sheep: { eats: "Sheep eat grass.", baby: "A baby sheep is called a lamb.", home: "Sheep live on farms and grassy hills.", fun: "Australia has more sheep than people!" },
+  duck: { eats: "Ducks eat plants, seeds, bugs and little water creatures.", baby: "A baby duck is called a duckling.", home: "Ducks live on ponds, lakes and rivers.", fun: "Ducks have waterproof feathers, so they stay dry!" },
+  rooster: { eats: "Roosters eat seeds, grain and bugs.", baby: "A baby chicken is called a chick.", home: "Roosters live on farms and in backyards.", fun: "Roosters crow to say 'this is my place!' and often start before the sun comes up." },
+  elephant: { eats: "Elephants eat grass, leaves, bark and fruit. Lots of it!", baby: "A baby elephant is called a calf.", home: "Elephants live in Africa and Asia.", fun: "Elephants use their trunk to smell, drink, pick things up and even give hugs!" },
+  monkey: { eats: "Monkeys eat fruit, leaves and bugs.", baby: "A baby monkey holds on tight to its mum as she climbs.", home: "Monkeys live in forests in warm parts of the world.", fun: "Howler monkeys are some of the loudest animals on land!" },
+  frog: { eats: "Frogs eat bugs. They catch them with a long sticky tongue!", baby: "A baby frog is called a tadpole. It swims with a tail before it grows legs.", home: "Frogs live in ponds, swamps and rainforests.", fun: "Frogs drink water through their skin!" },
+  wolf: { eats: "Wolves eat meat, like deer.", baby: "A baby wolf is called a pup.", home: "Wolves live in forests, mountains and snowy places in the north of the world.", fun: "Wolves live together in family groups called packs." },
+  bee: { eats: "Bees eat nectar and pollen from flowers.", baby: "A baby bee is called a larva. It looks like a tiny white worm.", home: "Honey bees live together in a hive.", fun: "Bees do a wiggly dance to tell each other where the flowers are!" },
+  kangaroo: { eats: "Kangaroos eat grass.", baby: "A baby kangaroo is called a joey. It lives in its mum's pouch.", home: "Kangaroos live all over Australia.", fun: "Kangaroos use their big strong tail like a fifth leg!" },
+  kookaburra: { eats: "Kookaburras eat bugs, worms, lizards and even small snakes.", baby: "A baby kookaburra is called a chick.", home: "Kookaburras live in the bush in Australia.", fun: "Kookaburras laugh to tell other birds 'this is our home!'" },
+  penguin: { eats: "Penguins eat fish and squid.", baby: "A baby penguin is called a chick.", home: "Penguins live in the south of the world. Little penguins live in Australia!", fun: "Penguins can't fly, but they're super fast swimmers!" },
+  whale: { eats: "Humpback whales eat tiny shrimp called krill, and small fish.", baby: "A baby whale is called a calf.", home: "Whales live in oceans all over the world.", fun: "Humpback whales sing long songs underwater!" },
+  bear: { eats: "Bears eat berries, nuts, fish and honey.", baby: "A baby bear is called a cub.", home: "Bears live in forests and mountains.", fun: "Bears have an amazing sense of smell, even better than a dog's!" },
+  snake: { eats: "Snakes eat mice, eggs and frogs. They swallow their food whole!", baby: "A baby snake is called a hatchling.", home: "Snakes live almost everywhere, except very cold places.", fun: "Snakes smell with their tongue!" },
+  tiger: { eats: "Tigers eat meat, like deer and wild pigs.", baby: "A baby tiger is called a cub.", home: "Tigers live in forests in Asia.", fun: "Every tiger has its own stripe pattern, and even its skin is stripy!" },
+  zebra: { eats: "Zebras eat grass.", baby: "A baby zebra is called a foal.", home: "Zebras live on the grasslands of Africa.", fun: "No two zebras have the same stripes!" },
+  gorilla: { eats: "Gorillas eat leaves, stems and fruit.", baby: "A baby gorilla rides on its mum's back.", home: "Gorillas live in forests in Africa.", fun: "A grown-up daddy gorilla is called a silverback, because of the silver hair on his back!" },
+  rhino: { eats: "Rhinos eat grass and leaves.", baby: "A baby rhino is called a calf.", home: "Rhinos live in Africa and Asia.", fun: "A rhino's horn is made of the same stuff as your fingernails!" },
+  crocodile: { eats: "Crocodiles eat fish, birds and other animals.", baby: "A baby crocodile is called a hatchling.", home: "Crocodiles live in rivers and swamps in warm places, like northern Australia.", fun: "Crocodile mums carry their babies gently in their mouth!" },
+  parrot: { eats: "Parrots eat seeds, fruit and nuts.", baby: "A baby parrot is called a chick.", home: "Parrots live in forests in warm places. Lots live in Australia!", fun: "Some parrots can copy words that people say!" },
+  flamingo: { eats: "Flamingos eat tiny shrimp, with their head upside down in the water!", baby: "A baby flamingo is called a chick. It's grey and fluffy!", home: "Flamingos live by salty lakes and lagoons.", fun: "Flamingos are pink because of the pink food they eat!" },
+  seal: { eats: "Seals eat fish and squid.", baby: "A baby seal is called a pup.", home: "Seals live in the ocean and rest on beaches and ice.", fun: "Some seals can hold their breath for over an hour!" },
+  shark: { eats: "Sharks eat fish, squid and seals.", baby: "A baby shark is called a pup.", home: "Sharks live in oceans all over the world.", fun: "Sharks lose teeth all the time and grow new ones!" },
+  mouse: { eats: "Mice eat seeds, grains and fruit.", baby: "A baby mouse is called a pup.", home: "Mice live in fields, forests and sometimes in houses!", fun: "A mouse uses its whiskers to feel its way in the dark." },
+  rabbit: { eats: "Rabbits eat grass, hay and vegetables.", baby: "A baby rabbit is called a kitten.", home: "Rabbits live in burrows under fields and meadows.", fun: "When rabbits are happy, they jump and twist in the air. That's called a binky!" },
+  donkey: { eats: "Donkeys eat grass and hay.", baby: "A baby donkey is called a foal.", home: "Donkeys live on farms and in dry, hilly places.", fun: "Donkeys have huge ears that help them hear far away and keep cool." },
+  panda: { eats: "Pandas eat bamboo, almost all day long!", baby: "A baby panda is called a cub.", home: "Pandas live in mountain forests in China.", fun: "A newborn panda is tiny, about as heavy as an apple!" },
+  sloth: { eats: "Sloths eat leaves.", baby: "A baby sloth hangs on to its mum's tummy.", home: "Sloths live in rainforests in Central and South America.", fun: "Sloths only climb down from their tree about once a week, to do a poo!" },
+  hedgehog: { eats: "Hedgehogs eat bugs, worms, beetles and slugs.", baby: "A baby hedgehog is called a hoglet.", home: "Hedgehogs live in gardens, hedges and fields.", fun: "A hedgehog has about 5,000 spikes!" },
+  wombat: { eats: "Wombats eat grass and roots.", baby: "A baby wombat is called a joey.", home: "Wombats live in burrows in south-eastern Australia.", fun: "A wombat's pouch faces backwards, so dirt doesn't get in when it digs!" },
+  platypus: { eats: "Platypuses eat worms, bugs and shrimp from the bottom of the river.", baby: "A baby platypus is called a puggle.", home: "Platypuses live in rivers and creeks in eastern Australia.", fun: "Platypuses are mammals that lay eggs!" },
+  emu: { eats: "Emus eat plants, seeds, fruit and bugs.", baby: "A baby emu is called a chick. It has stripes!", home: "Emus live all over Australia.", fun: "Emu dads sit on the eggs and look after the chicks!" },
+  goat: { eats: "Goats eat grass, leaves and weeds. They'll nibble almost anything!", baby: "A baby goat is called a kid.", home: "Goats live on farms and rocky mountains.", fun: "Goats are amazing climbers. Some even climb trees!" },
+  fox: { eats: "Foxes eat mice, rabbits, bugs and berries.", baby: "A baby fox is called a kit.", home: "Foxes live in forests, fields and even cities.", fun: "Foxes can hear a mouse squeak from far away, then pounce on it!" },
+  polarbear: { eats: "Polar bears eat seals.", baby: "A baby polar bear is called a cub.", home: "Polar bears live on the snow and ice near the North Pole.", fun: "A polar bear's fur looks white, but its skin is black!" },
+  camel: { eats: "Camels eat plants, dry grass and even prickly bushes.", baby: "A baby camel is called a calf.", home: "Camels live in hot, dry deserts. Lots of wild camels live in the Australian outback!", fun: "A camel's hump is full of fat, not water!" },
+  peacock: { eats: "Peacocks eat seeds, bugs and plants.", baby: "A baby peacock is called a peachick.", home: "Peacocks come from forests in India and Sri Lanka.", fun: "Only the boys have the big colourful tail. They open it up like a giant fan!" },
+  eagle: { eats: "Eagles eat fish, rabbits and other small animals.", baby: "A baby eagle is called an eaglet.", home: "Eagles build big nests on cliffs and tall trees, all over the world.", fun: "Eagles can see about four times better than people!" },
+  butterfly: { eats: "Butterflies drink nectar from flowers with a tongue like a straw.", baby: "A baby butterfly is called a caterpillar.", home: "Butterflies live almost anywhere there are flowers.", fun: "Butterflies taste with their feet!" },
+  ladybird: { eats: "Ladybirds eat tiny bugs called aphids that munch on plants.", baby: "A baby ladybird is called a larva. It looks like a tiny spiky crocodile!", home: "Ladybirds live in gardens, fields and forests.", fun: "A ladybird's bright spots tell birds 'I taste yucky, don't eat me!'" },
+  snail: { eats: "Snails eat leaves, plants and fruit.", baby: "Baby snails hatch from eggs with a tiny soft shell already on!", home: "Snails live in gardens and damp, shady places.", fun: "Snails make slime so they can slide along, even upside down!" },
+  crab: { eats: "Crabs eat seaweed, worms and little sea creatures.", baby: "Baby crabs are so tiny when they hatch, they float in the sea like specks of dust!", home: "Crabs live on beaches, in rock pools and on the ocean floor.", fun: "Crabs walk sideways, and they can grow back a lost leg!" },
+  chick: { eats: "Chicks eat seeds, grain and little bugs.", baby: "A chick grows up to be a hen or a rooster.", home: "Chicks live on farms and in backyard chicken coops.", fun: "Chicks start peeping to their mum while they're still inside the egg!" },
+  echidna: { eats: "Echidnas eat ants and termites with a long sticky tongue.", baby: "A baby echidna is called a puggle.", home: "Echidnas live all over Australia.", fun: "Echidnas are mammals that lay eggs, just like platypuses!" },
+};
+ANIMALS.forEach(a => Object.assign(a, MORE[a.id]));
 
 // What the narrator says after the animal sound (used for ElevenLabs voice files and the device voice)
 function narration(a) {
   return (a.silent ? a.say + " " : "") + `Do ${a.plural} sleep? ${a.answer} ${a.fact}`;
 }
 
-if (typeof module !== "undefined") module.exports = { ANIMALS, narration };
+// The "Tell me more" narration: voice/<id>-more.mp3
+function moreNarration(a) {
+  return [a.eats, a.baby, a.home, a.fun].filter(Boolean).join(" ");
+}
+
+// Sound game lines. "It's a koala!": voice/game-<id>.mp3. Shared prompts: voice/game-<key>.mp3
+const article = name => (/^[aeiou]/i.test(name) ? "an " : "a ") + name.toLowerCase();
+const gameNarration = a => `Yes! It's ${article(a.name)}!`;
+const GAME_LINES = {
+  ask: "Who makes that sound?",
+  again: "Hmm, not that one. Listen again!",
+  done: "Wow, well done! You got them all!"
+};
+
+if (typeof module !== "undefined") module.exports = { ANIMALS, narration, moreNarration, gameNarration, GAME_LINES };

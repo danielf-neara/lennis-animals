@@ -4,6 +4,10 @@
 //   node tools/make-audio.cjs --list-voices             show available voices
 //   node tools/make-audio.cjs --voice "Name" [--only lion,cow] [--force]
 //                                                        narrator files -> voice/<id>.mp3
+//   node tools/make-audio.cjs --voice "Name" --more      "Tell me more" files -> voice/<id>-more.mp3
+//   node tools/make-audio.cjs --voice "Name" --game      sound game lines -> voice/game-<id>.mp3 and game-ask/again/done
+//                                                        (--more / --game replace the sleep narration for that run)
+//   node tools/make-audio.cjs --dry-run ...              show what would be made and the character cost, spend nothing
 //   node tools/make-audio.cjs --sfx [--only lion] [--force]
 //                                                        generated animal sounds -> sounds/<id>.mp3
 //                                                        (skips animals that already have a real recording)
@@ -15,7 +19,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execFileSync } = require("child_process");
-const { ANIMALS, narration } = require("../animals.js");
+const { ANIMALS, narration, moreNarration, gameNarration, GAME_LINES } = require("../animals.js");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -23,6 +27,7 @@ const flag = f => args.includes(f);
 const opt = f => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : null; };
 const only = opt("--only") ? new Set(opt("--only").split(",")) : null;
 const force = flag("--force");
+const dry = flag("--dry-run");
 const API = "https://api.elevenlabs.io/v1";
 
 function key() {
@@ -68,27 +73,44 @@ async function listVoices() {
   }
 }
 
+// Each job is { file, text }: which narration set to make this run
+function voiceJobs() {
+  const animals = pickList(ANIMALS);
+  if (flag("--more")) return animals.map(a => ({ file: `${a.id}-more`, text: moreNarration(a) }));
+  if (flag("--game")) return [
+    ...Object.entries(GAME_LINES).filter(([k]) => !only || only.has(k)).map(([k, text]) => ({ file: `game-${k}`, text })),
+    ...animals.filter(a => !a.silent).map(a => ({ file: `game-${a.id}`, text: gameNarration(a) }))
+  ];
+  return animals.map(a => ({ file: a.id, text: narration(a) }));
+}
+
 async function makeVoice(name) {
+  const todo = voiceJobs().filter(j => force || !fs.existsSync(path.join(ROOT, "voice", j.file + ".mp3")));
+  const chars = todo.reduce((n, j) => n + j.text.length, 0);
+  if (dry) {
+    for (const j of todo) console.log(`  ${j.file.padEnd(18)} ${j.text}`);
+    console.log(`Dry run: ${todo.length} files, about ${chars} characters. Nothing generated.`);
+    return;
+  }
   const { voices } = await (await call(`${API}/voices`)).json();
   const v = voices.find(x => x.voice_id === name || x.name.toLowerCase().startsWith(name.toLowerCase()));
   if (!v) throw new Error(`Voice "${name}" not found. Run --list-voices.`);
-  const todo = pickList(ANIMALS).filter(a => force || !fs.existsSync(path.join(ROOT, "voice", a.id + ".mp3")));
-  const chars = todo.reduce((n, a) => n + narration(a).length, 0);
   console.log(`Voice: ${v.name}. ${todo.length} files, about ${chars} characters.`);
-  for (const a of todo) {
+  for (const j of todo) {
     const res = await call(`${API}/text-to-speech/${v.voice_id}?output_format=mp3_44100_128`, {
-      text: narration(a),
+      text: j.text,
       model_id: "eleven_multilingual_v2",
       voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.3 }
     });
-    await save(res, path.join(ROOT, "voice", a.id + ".mp3"));
-    console.log("  voice", a.id);
+    await save(res, path.join(ROOT, "voice", j.file + ".mp3"));
+    console.log("  voice", j.file);
   }
 }
 
 async function makeSfx() {
   const todo = pickList(ANIMALS).filter(a => a.sfx && (force || !fs.existsSync(path.join(ROOT, "sounds", a.id + ".mp3"))));
   console.log(`${todo.length} sound effects to generate.`);
+  if (dry) { todo.forEach(a => console.log(`  ${a.id.padEnd(18)} ${a.sfx}`)); return; }
   for (const a of todo) {
     const res = await call(`${API}/sound-generation?output_format=mp3_44100_128`, {
       text: a.sfx, duration_seconds: 3, prompt_influence: 0.5
@@ -114,6 +136,6 @@ function writeManifest() {
     if (flag("--list-voices")) return await listVoices();
     if (opt("--voice")) await makeVoice(opt("--voice"));
     if (flag("--sfx")) await makeSfx();
-    writeManifest();
+    if (!dry) writeManifest();
   } catch (e) { console.error("Error:", e.message); process.exit(1); }
 })();
