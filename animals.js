@@ -258,7 +258,7 @@ const ANIMALS = [
     answer: "Yes!", fact: "Echidnas sleep in a burrow or a hollow log. In cold places, they hibernate for weeks in winter!" },
 ];
 
-// Extra facts for the "Tell me more" part of each card. Full sentences, because the narrator reads them out.
+// Extra facts, one per button on each card. Full sentences, because the narrator reads them out.
 //   eats = food, baby = what the baby is called, home = where it lives, fun = one wow fact
 const MORE = {
   jellyfish: { eats: "Jellyfish eat tiny sea creatures called plankton.", baby: "Baby jellyfish start life as tiny blobs stuck to rocks, called polyps.", home: "Jellyfish live in oceans all over the world.", fun: "Jellyfish were around before the dinosaurs!" },
@@ -333,10 +333,8 @@ function narration(a) {
   return (a.silent ? a.say + " " : "") + `Do ${a.plural} sleep? ${a.answer} ${a.fact}`;
 }
 
-// The "Tell me more" narration: voice/<id>-more.mp3
-function moreNarration(a) {
-  return [a.eats, a.baby, a.home, a.fun].filter(Boolean).join(" ");
-}
+// Fact buttons other than sleep. Each is read out on its own: voice/<id>-<key>.mp3
+const FACT_KEYS = ["eats", "baby", "home", "fun"];
 
 // Sound game lines. "It's a koala!": voice/game-<id>.mp3. Shared prompts: voice/game-<key>.mp3
 const article = name => (/^[aeiou]/i.test(name) ? "an " : "a ") + name.toLowerCase();
@@ -347,4 +345,4 @@ const GAME_LINES = {
   done: "Wow, well done! You got them all!"
 };
 
-if (typeof module !== "undefined") module.exports = { ANIMALS, narration, moreNarration, gameNarration, GAME_LINES };
+if (typeof module !== "undefined") module.exports = { ANIMALS, narration, FACT_KEYS, gameNarration, GAME_LINES };

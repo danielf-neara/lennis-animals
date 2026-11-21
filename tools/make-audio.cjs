@@ -4,7 +4,7 @@
 //   node tools/make-audio.cjs --list-voices             show available voices
 //   node tools/make-audio.cjs --voice "Name" [--only lion,cow] [--force]
 //                                                        narrator files -> voice/<id>.mp3
-//   node tools/make-audio.cjs --voice "Name" --more      "Tell me more" files -> voice/<id>-more.mp3
+//   node tools/make-audio.cjs --voice "Name" --more      fact button files -> voice/<id>-eats|baby|home|fun.mp3
 //   node tools/make-audio.cjs --voice "Name" --game      sound game lines -> voice/game-<id>.mp3 and game-ask/again/done
 //                                                        (--more / --game replace the sleep narration for that run)
 //   node tools/make-audio.cjs --dry-run ...              show what would be made and the character cost, spend nothing
@@ -19,7 +19,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execFileSync } = require("child_process");
-const { ANIMALS, narration, moreNarration, gameNarration, GAME_LINES } = require("../animals.js");
+const { ANIMALS, narration, FACT_KEYS, gameNarration, GAME_LINES } = require("../animals.js");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -76,7 +76,7 @@ async function listVoices() {
 // Each job is { file, text }: which narration set to make this run
 function voiceJobs() {
   const animals = pickList(ANIMALS);
-  if (flag("--more")) return animals.map(a => ({ file: `${a.id}-more`, text: moreNarration(a) }));
+  if (flag("--more")) return animals.flatMap(a => FACT_KEYS.map(k => ({ file: `${a.id}-${k}`, text: a[k] })));
   if (flag("--game")) return [
     ...Object.entries(GAME_LINES).filter(([k]) => !only || only.has(k)).map(([k, text]) => ({ file: `game-${k}`, text })),
     ...animals.filter(a => !a.silent).map(a => ({ file: `game-${a.id}`, text: gameNarration(a) }))

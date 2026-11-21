@@ -84,11 +84,9 @@
   @keyframes boing { 0%{transform:scale(.3)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
 
   .sleep {
-    background: var(--night); color: #fff; padding: 20px 22px 24px; border-radius: 0 0 32px 32px;
+    background: var(--night); color: #fff; padding: 20px 22px 24px;
     position: relative; overflow: hidden;
-    opacity: 0; transition: opacity .6s ease-out;
   }
-  .sleep.show { opacity: 1; }
   .sleep .q { font-size: 1.5rem; margin: 0 0 8px; }
   .sleep .a {
     display: inline-block; background: var(--star); color: var(--night); font-weight: 700;
@@ -108,23 +106,31 @@
     font-size: 1.6rem; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.12); color: var(--ink);
   }
 
-  /* Tell me more */
-  .more { padding: 18px 18px 22px; }
-  .more-btn {
-    font: inherit; font-size: 1.5rem; font-weight: 700; border: none; cursor: pointer;
-    background: var(--star); color: var(--night); border-radius: 999px; padding: 12px 28px;
-    box-shadow: 0 5px 0 rgba(0,0,0,.15);
+  /* Fact buttons: appear after the animal sound */
+  .fact-btns {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 16px 12px 8px;
+    opacity: 0; transform: translateY(12px); transition: opacity .4s, transform .4s; pointer-events: none;
   }
-  .more-btn:active { transform: scale(.95); }
-  .facts { display: none; text-align: left; margin: 0; padding: 0; list-style: none; }
-  .more.open .facts { display: grid; gap: 10px; }
-  .more.open .more-btn { display: none; }
-  .facts li {
-    display: flex; gap: 12px; align-items: center; border-radius: 20px; padding: 10px 14px;
-    font-size: 1.2rem; line-height: 1.35; animation: boing .5s ease-out both;
+  .fact-btns.show { opacity: 1; transform: none; pointer-events: auto; }
+  .fact-btn {
+    font: inherit; border: none; cursor: pointer; color: var(--ink);
+    width: 84px; height: 92px; border-radius: 24px; padding: 6px 0 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    box-shadow: 0 5px 0 rgba(0,0,0,.14); transition: transform .12s;
   }
-  .facts li:nth-child(2) { animation-delay: .1s } .facts li:nth-child(3) { animation-delay: .2s } .facts li:nth-child(4) { animation-delay: .3s }
-  .facts .ic { font-size: 2rem; flex: none; }
+  .fact-btn .ic { font-size: 2.6rem; line-height: 1; }
+  .fact-btn .lb { font-size: 1rem; font-weight: 700; }
+  .fact-btn:active { transform: scale(.92); }
+  .fact-btn.on { outline: 4px solid var(--ink); outline-offset: 2px; }
+  .fact-btns.show .fact-btn { animation: boing .5s ease-out both; }
+  .fact-btns.show .fact-btn:nth-child(2) { animation-delay: .08s } .fact-btns.show .fact-btn:nth-child(3) { animation-delay: .16s }
+  .fact-btns.show .fact-btn:nth-child(4) { animation-delay: .24s } .fact-btns.show .fact-btn:nth-child(5) { animation-delay: .32s }
+  .panel { margin: 8px 16px 18px; border-radius: 24px; min-height: 0; }
+  .panel:empty { display: none; }
+  .panel .plain { padding: 16px 20px; display: flex; gap: 14px; align-items: center; text-align: left; animation: boing .45s ease-out; }
+  .panel .plain .ic { font-size: 3rem; flex: none; }
+  .panel .plain p { margin: 0; font-size: 1.35rem; line-height: 1.4; }
+  .panel .sleep { border-radius: 24px; animation: boing .45s ease-out; }
 
   /* Sound game */
   .play-btn {
@@ -374,35 +380,51 @@ function stopAll() {
   if (synth) synth.cancel();
 }
 
+// Tapping an animal plays just its sound, then the fact buttons appear
 async function speakAnimal(a) {
   stopAll();
   const me = playId;
-  const stillMe = () => me === playId;
-  // 1. The animal's sound: real recording, otherwise the device voice says it
   if (hasSound.has(a.id)) await playFile(`sounds/${a.id}.mp3`);
-  else if (!a.silent || !hasVoice.has(a.id)) await say(a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
-  if (!stillMe()) return;
-  showSleep();
-  await wait(350);
-  if (!stillMe()) return;
-  // 2. The sleep fact: recorded narrator, otherwise the device voice
-  if (hasVoice.has(a.id)) { await playFile(`voice/${a.id}.mp3`); return; }
-  if (a.silent && hasSound.has(a.id)) await say(a.say);
-  if (!stillMe()) return;
-  await say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
+  else await say(a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
+  if (me === playId) showFactBtns();
 }
 
-// Food, baby, home, wow fact
-const MORE_ROWS = [["eats", "🍽️"], ["baby", "🍼"], ["home", "🏠"], ["fun", "🤩"]];
-async function speakMore(a) {
+// The fact buttons. Icons a 5 year old knows. voice file: sleep = voice/<id>.mp3, others = voice/<id>-<key>.mp3
+const FACTS = [
+  { key: "sleep", ic: "🛏️", label: "Sleep", bg: "#c9cdf5" },
+  { key: "eats",  ic: "🍎", label: "Food",  bg: "#ffd0c8" },
+  { key: "baby",  ic: "🍼", label: "Baby",  bg: "#fde2f0" },
+  { key: "home",  ic: "🏠", label: "Home",  bg: "#d4efd0" },
+  { key: "fun",   ic: "⭐", label: "Wow!",  bg: "#fff0a8" }
+];
+const MORE_ROWS = FACTS.filter(f => f.key !== "sleep").map(f => [f.key, f.ic]);
+
+function showFactBtns() {
+  const b = card.querySelector(".fact-btns");
+  if (b) b.classList.add("show");
+}
+
+function showFact(a, f) {
   stopAll();
-  if (hasVoice.has(`${a.id}-more`)) await playFile(`voice/${a.id}-more.mp3`);
-  else await say(moreNarration(a));
-}
-
-function showSleep() {
-  const s = card.querySelector(".sleep");
-  if (s) s.classList.add("show");
+  card.querySelectorAll(".fact-btn").forEach(b => b.classList.toggle("on", b.dataset.key === f.key));
+  const panel = card.querySelector(".panel");
+  panel.innerHTML = f.key === "sleep" ? `
+    <div class="sleep">
+      <div class="moon">🌙</div>
+      <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
+      <p class="q">Do ${a.plural} sleep?</p>
+      <div class="a">${a.answer}</div>
+      <p class="fact">${a.fact}</p>
+    </div>` : `
+    <div class="plain" style="background:${f.bg}"><span class="ic">${f.ic}</span><p>${a[f.key]}</p></div>`;
+  panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  if (f.key === "sleep") {
+    if (hasVoice.has(a.id)) playFile(`voice/${a.id}.mp3`);
+    else say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
+  } else {
+    if (hasVoice.has(`${a.id}-${f.key}`)) playFile(`voice/${a.id}-${f.key}.mp3`);
+    else say(a[f.key]);
+  }
 }
 
 // ---- Grid ----
@@ -434,29 +456,20 @@ function openCard(a) {
       <h2>${a.name}</h2>
       <div class="bubble">${a.sound}</div>
     </div>
-    <div class="sleep">
-      <div class="moon">🌙</div>
-      <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
-      <p class="q">Do ${a.plural} sleep?</p>
-      <div class="a">${a.answer}</div>
-      <p class="fact">${a.fact}</p>
+    <div class="fact-btns">${FACTS.map(f => `
+      <button class="fact-btn" data-key="${f.key}" style="background:${f.bg}" aria-label="${f.label}">
+        <span class="ic">${f.ic}</span><span class="lb">${f.label}</span>
+      </button>`).join("")}
     </div>
-    <div class="more">
-      <button class="more-btn" id="moreBtn">⭐ Tell me more!</button>
-      <ul class="facts">
-        ${MORE_ROWS.map(([k, ic]) => `<li style="background:${a.colour}"><span class="ic">${ic}</span><span>${a[k]}</span></li>`).join("")}
-      </ul>
-    </div>`;
+    <div class="panel"></div>`;
   overlay.classList.add("open");
-  document.getElementById("moreBtn").onclick = e => {
+  card.querySelectorAll(".fact-btn").forEach(b => b.onclick = e => {
     e.stopPropagation();
-    card.querySelector(".more").classList.add("open");
-    card.querySelector(".facts").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    speakMore(a);
-  };
+    showFact(a, FACTS.find(f => f.key === b.dataset.key));
+  });
   card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
   speakAnimal(a);
-  setTimeout(showSleep, 6000); // show the sleep part even if audio is slow or blocked
+  setTimeout(showFactBtns, 5000); // show the buttons even if audio is slow or blocked
   document.getElementById("again").onclick = e => { e.stopPropagation(); speakAnimal(a); };
   document.getElementById("close").onclick = e => { e.stopPropagation(); closeCard(); };
 }
@@ -584,7 +597,7 @@ book.innerHTML =
       <div class="bp">${pic(a)}</div>
       <h2>${a.name}</h2>
       <div class="bs">${a.sound}</div>
-      <p class="bq">Do ${a.plural} sleep? <b>${a.answer}</b></p>
+      <p class="bq">🛏️ Do ${a.plural} sleep? <b>${a.answer}</b></p>
       <p class="bf">${a.fact}</p>
       <ul class="bm">${MORE_ROWS.map(([k, ic]) => `<li>${ic} ${a[k]}</li>`).join("")}</ul>
     </section>`).join("");
