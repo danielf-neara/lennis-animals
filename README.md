@@ -12,3 +12,4 @@ Tap-an-animal game for Lenni (5). 64 animals. Each tile plays the animal's sound
 - **Check cost first:** add `--dry-run` to any command to see files and character count without spending credits. Free tier is 10,000 characters a month; the food/baby/home/wow facts for all animals are about 12,000 on their own
 
 Sleep facts were written from general knowledge and simplified for a 5 year old. Key ones: upside-down jellyfish sleep-like state (Nath et al., Current Biology, 2017); dolphins' half-brain sleep; fat-tailed dwarf lemur hibernation; sea otters holding hands.
+- **After changing `animals.js` or audio:** bump the `?v=` number on the two `<script>` tags in `index.html`, so iPads don't keep an old cached copy

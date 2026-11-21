@@ -212,8 +212,8 @@
 
 <div class="book" id="book"></div>
 
-<script src="animals.js"></script>
-<script src="audio-manifest.js"></script>
+<script src="animals.js?v=7"></script>
+<script src="audio-manifest.js?v=7"></script>
 <script>
 // Cartoon drawings for animals with no emoji
 const SVG = {
@@ -365,12 +365,18 @@ const hasSound = new Set(AUDIO.sounds), hasVoice = new Set(AUDIO.voice);
 // One reused <audio> element: iPad Safari only lets an element play after a tap has "unlocked" it
 const player = new Audio();
 player.preload = "auto";
+// Resolves true if the file played (or was cut off by another tap), false if it couldn't load
 function playFile(src) {
   return new Promise(done => {
-    player.onended = done; player.onerror = done;
+    player.onended = () => done(true); player.onerror = () => done(false);
     player.src = src;
-    player.play().catch(done);
+    player.play().catch(e => done(e && e.name === "AbortError"));
   });
+}
+// Always try the recording first, even if a cached manifest doesn't list it. Device voice only if it fails.
+async function voiceOr(src, text, opts) {
+  const me = playId;
+  if (!(await playFile(src)) && me === playId) await say(text, opts);
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -386,8 +392,7 @@ async function speakAnimal(a) {
   stopAll();
   const me = playId;
   if (hasSound.has(a.id)) await playFile(`sounds/${a.id}.mp3`);
-  else if (hasVoice.has(`${a.id}-say`)) await playFile(`voice/${a.id}-say.mp3`);
-  else await say(a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
+  else await voiceOr(`voice/${a.id}-say.mp3`, a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
   if (me === playId) showFactBtns();
 }
 
@@ -421,13 +426,8 @@ function showFact(a, f) {
     <div class="plain" style="background:${f.bg}"><span class="ic">${f.ic}</span>
       <div><p class="pq">${factQuestion(a, f.key)}</p><p>${a[f.key]}</p></div></div>`;
   panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  if (f.key === "sleep") {
-    if (hasVoice.has(a.id)) playFile(`voice/${a.id}.mp3`);
-    else say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
-  } else {
-    if (hasVoice.has(`${a.id}-${f.key}`)) playFile(`voice/${a.id}-${f.key}.mp3`);
-    else say(factNarration(a, f.key));
-  }
+  if (f.key === "sleep") voiceOr(`voice/${a.id}.mp3`, `Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
+  else voiceOr(`voice/${a.id}-${f.key}.mp3`, factNarration(a, f.key));
 }
 
 // ---- Grid ----
@@ -495,7 +495,7 @@ const gamePool = () => ANIMALS.filter(a => hasSound.has(a.id) && !a.silent);
 let game = null;
 
 function gameLine(key, text) {
-  return hasVoice.has(`game-${key}`) ? playFile(`voice/game-${key}.mp3`) : say(text);
+  return voiceOr(`voice/game-${key}.mp3`, text);
 }
 
 function openGame() {
