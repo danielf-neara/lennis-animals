@@ -23,7 +23,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execFileSync } = require("child_process");
-const { ANIMALS, narration, FACT_KEYS, gameNarration, GAME_LINES } = require("../animals.js");
+const { ANIMALS, narration, FACT_KEYS, factNarration, gameNarration, GAME_LINES } = require("../animals.js");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -80,7 +80,7 @@ async function listVoices() {
 // Each job is { file, text }: which narration set to make this run
 function voiceJobs() {
   const animals = pickList(ANIMALS);
-  if (flag("--more")) return animals.flatMap(a => FACT_KEYS.map(k => ({ file: `${a.id}-${k}`, text: a[k] })));
+  if (flag("--more")) return animals.flatMap(a => FACT_KEYS.map(k => ({ file: `${a.id}-${k}`, text: factNarration(a, k) })));
   if (flag("--say")) return animals.filter(a => a.silent && !fs.existsSync(path.join(ROOT, "sounds", a.id + ".mp3")))
     .map(a => ({ file: `${a.id}-say`, text: a.say }));
   if (flag("--game")) return [

@@ -130,6 +130,7 @@
   .panel .plain { padding: 16px 20px; display: flex; gap: 14px; align-items: center; text-align: left; animation: boing .45s ease-out; }
   .panel .plain .ic { font-size: 3rem; flex: none; }
   .panel .plain p { margin: 0; font-size: 1.35rem; line-height: 1.4; }
+  .panel .plain .pq { font-weight: 700; font-size: 1.45rem; margin-bottom: 4px; }
   .panel .sleep { border-radius: 24px; animation: boing .45s ease-out; }
 
   /* Sound game */
@@ -417,14 +418,15 @@ function showFact(a, f) {
       <div class="a">${a.answer}</div>
       <p class="fact">${a.fact}</p>
     </div>` : `
-    <div class="plain" style="background:${f.bg}"><span class="ic">${f.ic}</span><p>${a[f.key]}</p></div>`;
+    <div class="plain" style="background:${f.bg}"><span class="ic">${f.ic}</span>
+      <div><p class="pq">${factQuestion(a, f.key)}</p><p>${a[f.key]}</p></div></div>`;
   panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   if (f.key === "sleep") {
     if (hasVoice.has(a.id)) playFile(`voice/${a.id}.mp3`);
     else say(`Do ${a.plural} sleep? ${a.answer.replace("!", ".")} ${a.fact}`);
   } else {
     if (hasVoice.has(`${a.id}-${f.key}`)) playFile(`voice/${a.id}-${f.key}.mp3`);
-    else say(a[f.key]);
+    else say(factNarration(a, f.key));
   }
 }
 
@@ -600,7 +602,7 @@ book.innerHTML =
       <div class="bs">${a.sound}</div>
       <p class="bq">🛏️ Do ${a.plural} sleep? <b>${a.answer}</b></p>
       <p class="bf">${a.fact}</p>
-      <ul class="bm">${MORE_ROWS.map(([k, ic]) => `<li>${ic} ${a[k]}</li>`).join("")}</ul>
+      <ul class="bm">${MORE_ROWS.map(([k, ic]) => `<li>${ic} <b>${factQuestion(a, k)}</b> ${a[k]}</li>`).join("")}</ul>
     </section>`).join("");
 document.getElementById("printBtn").addEventListener("click", () => window.print());
 </script>

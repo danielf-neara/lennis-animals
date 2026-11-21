@@ -323,7 +323,7 @@ const MORE = {
   ladybird: { eats: "Ladybirds eat tiny bugs called aphids that munch on plants.", baby: "A baby ladybird is called a larva. It looks like a tiny spiky crocodile!", home: "Ladybirds live in gardens, fields and forests.", fun: "A ladybird's bright spots tell birds 'I taste yucky, don't eat me!'" },
   snail: { eats: "Snails eat leaves, plants and fruit.", baby: "Baby snails hatch from eggs with a tiny soft shell already on!", home: "Snails live in gardens and damp, shady places.", fun: "Snails make slime so they can slide along, even upside down!" },
   crab: { eats: "Crabs eat seaweed, worms and little sea creatures.", baby: "Baby crabs are so tiny when they hatch, they float in the sea like specks of dust!", home: "Crabs live on beaches, in rock pools and on the ocean floor.", fun: "Crabs walk sideways, and they can grow back a lost leg!" },
-  chick: { eats: "Chicks eat seeds, grain and little bugs.", baby: "A chick grows up to be a hen or a rooster.", home: "Chicks live on farms and in backyard chicken coops.", fun: "Chicks start peeping to their mum while they're still inside the egg!" },
+  chick: { babyQ: "What does a chick grow up to be?", eats: "Chicks eat seeds, grain and little bugs.", baby: "A chick grows up to be a hen or a rooster.", home: "Chicks live on farms and in backyard chicken coops.", fun: "Chicks start peeping to their mum while they're still inside the egg!" },
   echidna: { eats: "Echidnas eat ants and termites with a long sticky tongue.", baby: "A baby echidna is called a puggle.", home: "Echidnas live all over Australia.", fun: "Echidnas are mammals that lay eggs, just like platypuses!" },
 };
 ANIMALS.forEach(a => Object.assign(a, MORE[a.id]));
@@ -333,8 +333,18 @@ function narration(a) {
   return (a.silent ? a.say + " " : "") + `Do ${a.plural} sleep? ${a.answer} ${a.fact}`;
 }
 
-// Fact buttons other than sleep. Each is read out on its own: voice/<id>-<key>.mp3
+// Fact buttons other than sleep. Like sleep, each one asks its question first, then answers.
+// Read out on its own: voice/<id>-<key>.mp3
 const FACT_KEYS = ["eats", "baby", "home", "fun"];
+function factQuestion(a, key) {
+  const one = a.name.toLowerCase();
+  if (key === "eats") return `What do ${a.plural} eat?`;
+  if (key === "home") return `Where do ${a.plural} live?`;
+  if (key === "fun") return `Here's a wow fact about ${a.plural}!`;
+  if (a.babyQ) return a.babyQ;
+  return /called/.test(a.baby) ? `What is a baby ${one} called?` : `What are baby ${a.plural} like?`;
+}
+const factNarration = (a, key) => `${factQuestion(a, key)} ${a[key]}`;
 
 // Sound game lines. "It's a koala!": voice/game-<id>.mp3. Shared prompts: voice/game-<key>.mp3
 const article = name => (/^[aeiou]/i.test(name) ? "an " : "a ") + name.toLowerCase();
@@ -345,4 +355,4 @@ const GAME_LINES = {
   done: "Wow, well done! You got them all!"
 };
 
-if (typeof module !== "undefined") module.exports = { ANIMALS, narration, FACT_KEYS, gameNarration, GAME_LINES };
+if (typeof module !== "undefined") module.exports = { ANIMALS, narration, FACT_KEYS, factQuestion, factNarration, gameNarration, GAME_LINES };
