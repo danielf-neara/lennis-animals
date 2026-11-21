@@ -385,6 +385,7 @@ async function speakAnimal(a) {
   stopAll();
   const me = playId;
   if (hasSound.has(a.id)) await playFile(`sounds/${a.id}.mp3`);
+  else if (hasVoice.has(`${a.id}-say`)) await playFile(`voice/${a.id}-say.mp3`);
   else await say(a.say, { pitch: 1 + ((a.pitch ?? 1) - 1) * 0.3, rate: a.rate ?? 0.92 });
   if (me === playId) showFactBtns();
 }

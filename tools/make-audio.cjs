@@ -7,6 +7,10 @@
 //   node tools/make-audio.cjs --voice "Name" --more      fact button files -> voice/<id>-eats|baby|home|fun.mp3
 //   node tools/make-audio.cjs --voice "Name" --game      sound game lines -> voice/game-<id>.mp3 and game-ask/again/done
 //                                                        (--more / --game replace the sleep narration for that run)
+//   node tools/make-audio.cjs --voice "Name" --say       spoken sound line for silent animals with no sound file -> voice/<id>-say.mp3
+//   node tools/make-audio.cjs --mac Karen [--more|--game|--say]
+//                                                        same as --voice but free, using the macOS "say" voice instead of ElevenLabs
+//                                                        (existing files are kept, so use --force to swap them for ElevenLabs later)
 //   node tools/make-audio.cjs --dry-run ...              show what would be made and the character cost, spend nothing
 //   node tools/make-audio.cjs --sfx [--only lion] [--force]
 //                                                        generated animal sounds -> sounds/<id>.mp3
@@ -77,6 +81,8 @@ async function listVoices() {
 function voiceJobs() {
   const animals = pickList(ANIMALS);
   if (flag("--more")) return animals.flatMap(a => FACT_KEYS.map(k => ({ file: `${a.id}-${k}`, text: a[k] })));
+  if (flag("--say")) return animals.filter(a => a.silent && !fs.existsSync(path.join(ROOT, "sounds", a.id + ".mp3")))
+    .map(a => ({ file: `${a.id}-say`, text: a.say }));
   if (flag("--game")) return [
     ...Object.entries(GAME_LINES).filter(([k]) => !only || only.has(k)).map(([k, text]) => ({ file: `game-${k}`, text })),
     ...animals.filter(a => !a.silent).map(a => ({ file: `game-${a.id}`, text: gameNarration(a) }))
@@ -90,6 +96,18 @@ async function makeVoice(name) {
   if (dry) {
     for (const j of todo) console.log(`  ${j.file.padEnd(18)} ${j.text}`);
     console.log(`Dry run: ${todo.length} files, about ${chars} characters. Nothing generated.`);
+    return;
+  }
+  if (opt("--mac")) {
+    console.log(`Mac voice: ${name}. ${todo.length} files.`);
+    for (const j of todo) {
+      const out = path.join(ROOT, "voice", j.file + ".mp3"), aiff = out + ".tmp.aiff";
+      execFileSync("say", ["-v", name, "-r", "165", "-o", aiff, j.text]);
+      execFileSync("ffmpeg", ["-v", "error", "-y", "-i", aiff, out]);
+      fs.unlinkSync(aiff);
+      normalise(out);
+      console.log("  voice", j.file);
+    }
     return;
   }
   const { voices } = await (await call(`${API}/voices`)).json();
@@ -134,7 +152,7 @@ function writeManifest() {
 (async () => {
   try {
     if (flag("--list-voices")) return await listVoices();
-    if (opt("--voice")) await makeVoice(opt("--voice"));
+    if (opt("--voice") || opt("--mac")) await makeVoice(opt("--voice") || opt("--mac"));
     if (flag("--sfx")) await makeSfx();
     if (!dry) writeManifest();
   } catch (e) { console.error("Error:", e.message); process.exit(1); }
